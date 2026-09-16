@@ -1,0 +1,15 @@
+export const ROUTES = {
+  home: '/',
+  explore: '/explore',
+  propertyDetail: (id: string) => `/property/${id}`,
+  compare: '/compare',
+  saved: '/saved',
+  profile: '/profile',
+  login: '/login',
+  register: '/register',
+  owner: '/owner',
+  ownerProperties: '/owner/properties',
+  ownerProperty: (id: string) => `/owner/properties/${id}`,
+  ownerPropertyNew: '/owner/properties/new',
+  ownerInquiries: '/owner/inquiries',
+} as const;
