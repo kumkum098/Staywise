@@ -39,15 +39,17 @@ export const LandingPage: React.FC = () => {
   return (
     <div className="space-y-16 pb-12">
       {/* Hero Section */}
-      <section className="relative bg-white border-b border-surface-border py-14 lg:py-20 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden border-b border-surface-border bg-gradient-to-b from-brand-50/60 via-white to-white py-14 lg:py-20">
+        <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-brand-200/40 blur-3xl" />
+        <div className="pointer-events-none absolute -left-16 top-40 h-56 w-56 rounded-full bg-brand-100/50 blur-3xl" />
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl space-y-4">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 bg-brand-50 border border-brand-200 rounded-full text-brand-700 text-xs font-semibold">
+            <div className="inline-flex items-center space-x-2 px-3 py-1 bg-white/80 backdrop-blur-sm border border-brand-200 rounded-full text-brand-700 text-xs font-semibold shadow-subtle">
               <ShieldCheck className="w-4 h-4 text-brand-700" />
               <span>Jaipur Accommodation Discovery Platform</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-ink-primary leading-tight">
-              Know the place before you move in.
+            <h1 className="text-display text-4xl sm:text-5xl lg:text-6xl text-ink-primary">
+              Know the place <span className="text-brand-700">before</span> you move in.
             </h1>
             <p className="text-base sm:text-lg text-ink-secondary leading-relaxed">
               Compare PGs, hostels, co-living spaces, and rental rooms by real monthly cost, actual living conditions, and college distance.
@@ -55,7 +57,7 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* Primary Search Module */}
-          <div className="mt-8 bg-white rounded-xl border border-surface-border shadow-card p-4 sm:p-5">
+          <div className="relative mt-8 bg-white rounded-xl border border-surface-border shadow-card p-4 sm:p-5">
             <form onSubmit={handleSearch} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
               {/* Location Area */}
               <div>
@@ -242,18 +244,18 @@ export const LandingPage: React.FC = () => {
 
       {/* Owner CTA Banner */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-ink-primary text-white rounded-xl p-8 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+        <div className="bg-gradient-to-br from-ink-primary to-brand-950 text-white rounded-xl p-8 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
           <div className="space-y-2 max-w-xl">
             <h2 className="text-2xl font-bold">Are you a property manager or PG owner in Jaipur?</h2>
             <p className="text-xs text-gray-300 leading-relaxed">
-              List your property on Staywise with transparent pricing structures, manage room occupancies, and connect directly with verified student inquiries.
+              List your property on Staywise with transparent pricing structures, manage room occupancies, and connect directly with verified tenant inquiries.
             </p>
           </div>
           <Link
-            to={ROUTES.owner}
+            to={`${ROUTES.register}?role=owner`}
             className="px-6 py-3 bg-brand-700 hover:bg-brand-600 text-white text-xs font-bold rounded-lg transition-colors shadow-subtle shrink-0"
           >
-            Access Owner Portal
+            List your property
           </Link>
         </div>
       </section>

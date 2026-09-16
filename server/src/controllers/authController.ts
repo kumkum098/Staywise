@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/User.js';
 import { AuthRequest } from '../middleware/auth.js';
-import { registerSchema, loginSchema, userPreferencesSchema } from '../validators/schemas.js';
+import { registerSchema, loginSchema, userPreferencesSchema, updateProfileSchema } from '../validators/schemas.js';
 
 const generateToken = (userId: string): string => {
   const secret = process.env.JWT_SECRET || 'staywise_super_secret_jwt_key_2026_dev';
@@ -115,6 +115,37 @@ export const getMe = async (req: AuthRequest, res: Response, next: NextFunction)
           role: req.user.role,
           phone: req.user.phone,
           preferences: req.user.preferences,
+        },
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateProfile = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: 'Not authenticated' });
+    }
+
+    const validatedData = updateProfileSchema.parse(req.body);
+
+    const updatedUser = await User.findByIdAndUpdate(req.user._id, { $set: validatedData }, { new: true }).select(
+      '-passwordHash'
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully.',
+      data: {
+        user: {
+          id: updatedUser?._id,
+          name: updatedUser?.name,
+          email: updatedUser?.email,
+          role: updatedUser?.role,
+          phone: updatedUser?.phone,
+          preferences: updatedUser?.preferences,
         },
       },
     });

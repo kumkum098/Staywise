@@ -4,6 +4,14 @@ import { Property } from '../models/Property.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { reviewCreateSchema } from '../validators/schemas.js';
 
+const withVerifiedFlag = (review: any) => {
+  const obj = typeof review.toObject === 'function' ? review.toObject() : review;
+  return {
+    ...obj,
+    isVerifiedDetails: Boolean(obj.stayDurationMonths && obj.roomType),
+  };
+};
+
 export const getReviewsByProperty = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { propertyId } = req.params;
@@ -11,7 +19,7 @@ export const getReviewsByProperty = async (req: Request, res: Response, next: Ne
       .populate('user', 'name role')
       .sort({ createdAt: -1 });
 
-    return res.status(200).json({ success: true, data: { reviews } });
+    return res.status(200).json({ success: true, data: { reviews: reviews.map(withVerifiedFlag) } });
   } catch (error) {
     next(error);
   }
@@ -40,8 +48,10 @@ export const addReview = async (req: AuthRequest, res: Response, next: NextFunct
           validatedData.noise +
           validatedData.location +
           validatedData.privacy +
-          validatedData.safety) /
-        7
+          validatedData.safety +
+          validatedData.ownerResponsiveness +
+          validatedData.valueForMoney) /
+        9
       ).toFixed(1)
     );
 
@@ -66,6 +76,8 @@ export const addReview = async (req: AuthRequest, res: Response, next: NextFunct
     const avgLoc = Number((allReviews.reduce((sum, r) => sum + r.location, 0) / count).toFixed(1));
     const avgPriv = Number((allReviews.reduce((sum, r) => sum + r.privacy, 0) / count).toFixed(1));
     const avgSafe = Number((allReviews.reduce((sum, r) => sum + r.safety, 0) / count).toFixed(1));
+    const avgOwnerResp = Number((allReviews.reduce((sum, r) => sum + r.ownerResponsiveness, 0) / count).toFixed(1));
+    const avgValue = Number((allReviews.reduce((sum, r) => sum + r.valueForMoney, 0) / count).toFixed(1));
 
     await Property.findByIdAndUpdate(propertyId, {
       $set: {
@@ -79,6 +91,8 @@ export const addReview = async (req: AuthRequest, res: Response, next: NextFunct
           location: avgLoc,
           privacy: avgPriv,
           safety: avgSafe,
+          ownerResponsiveness: avgOwnerResp,
+          valueForMoney: avgValue,
           overall: avgOverall,
         },
       },
@@ -87,7 +101,7 @@ export const addReview = async (req: AuthRequest, res: Response, next: NextFunct
     return res.status(201).json({
       success: true,
       message: 'Review submitted successfully.',
-      data: { review },
+      data: { review: withVerifiedFlag(review) },
     });
   } catch (error) {
     next(error);

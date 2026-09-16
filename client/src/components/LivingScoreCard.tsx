@@ -1,6 +1,7 @@
 import React from 'react';
-import { Award, Wifi, Shield, Sparkles, Volume2, MapPin, Lock, Utensils } from 'lucide-react';
+import { Award, Wifi, Shield, Sparkles, Volume2, MapPin, Lock, Utensils, MessageCircle, IndianRupee } from 'lucide-react';
 import { LivingScore } from '../types';
+import { Progress } from './ui/Progress';
 
 interface LivingScoreCardProps {
   score: LivingScore;
@@ -16,6 +17,8 @@ export const LivingScoreCard: React.FC<LivingScoreCardProps> = ({ score, reviewC
     { label: 'Location Convenience', value: score.location, icon: MapPin },
     { label: 'Privacy Standard', value: score.privacy, icon: Lock },
     { label: 'Safety & Security', value: score.safety, icon: Shield },
+    { label: 'Owner Responsiveness', value: score.ownerResponsiveness, icon: MessageCircle },
+    { label: 'Value for Money', value: score.valueForMoney, icon: IndianRupee },
   ];
 
   return (
@@ -44,7 +47,6 @@ export const LivingScoreCard: React.FC<LivingScoreCardProps> = ({ score, reviewC
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 pt-1">
         {metrics.map((m) => {
           const Icon = m.icon;
-          const percentage = (m.value / 10) * 100;
           return (
             <div key={m.label} className="space-y-1">
               <div className="flex justify-between text-xs">
@@ -54,12 +56,7 @@ export const LivingScoreCard: React.FC<LivingScoreCardProps> = ({ score, reviewC
                 </span>
                 <span className="font-semibold text-ink-primary">{m.value.toFixed(1)}</span>
               </div>
-              <div className="w-full bg-surface-muted h-2 rounded-full overflow-hidden">
-                <div
-                  className="bg-brand-700 h-full rounded-full transition-all duration-500"
-                  style={{ width: `${percentage}%` }}
-                ></div>
-              </div>
+              <Progress value={m.value} />
             </div>
           );
         })}

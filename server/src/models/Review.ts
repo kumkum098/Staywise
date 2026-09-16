@@ -12,8 +12,13 @@ export interface IReview extends Document {
   location: number;
   privacy: number;
   safety: number;
+  ownerResponsiveness: number;
+  valueForMoney: number;
   overall: number;
   comment: string;
+  whatIWishIKnew?: string;
+  stayDurationMonths?: number;
+  roomType?: 'single' | 'double' | 'triple' | 'quad';
   createdAt: Date;
   updatedAt: Date;
 }
@@ -31,8 +36,13 @@ const ReviewSchema = new Schema<IReview>(
     location: { type: Number, required: true, min: 1, max: 10 },
     privacy: { type: Number, required: true, min: 1, max: 10 },
     safety: { type: Number, required: true, min: 1, max: 10 },
+    ownerResponsiveness: { type: Number, required: true, min: 1, max: 10 },
+    valueForMoney: { type: Number, required: true, min: 1, max: 10 },
     overall: { type: Number, required: true, min: 1, max: 10 },
     comment: { type: String, required: true, trim: true },
+    whatIWishIKnew: { type: String, trim: true },
+    stayDurationMonths: { type: Number, min: 1 },
+    roomType: { type: String, enum: ['single', 'double', 'triple', 'quad'] },
   },
   { timestamps: true }
 );

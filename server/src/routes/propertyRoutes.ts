@@ -6,11 +6,11 @@ import {
   updateProperty,
   deleteProperty,
 } from '../controllers/propertyController.js';
-import { authenticate, authorize } from '../middleware/auth.js';
+import { authenticate, authenticateOptional, authorize } from '../middleware/auth.js';
 
 const router = Router();
 
-router.get('/', getProperties);
+router.get('/', authenticateOptional, getProperties);
 router.get('/:id', getPropertyById);
 
 router.post('/', authenticate, authorize('owner', 'admin'), createProperty);

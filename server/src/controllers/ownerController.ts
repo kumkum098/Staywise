@@ -20,8 +20,25 @@ export const getOwnerStats = async (req: AuthRequest, res: Response, next: NextF
     const availableRooms = Math.max(0, totalRooms - occupiedRooms);
     const occupancyRate = totalRooms > 0 ? Math.round((occupiedRooms / totalRooms) * 100) : 0;
 
-    const inquiries = await Inquiry.countDocuments({ property: { $in: propertyIds }, status: { $in: ['new', 'contacted'] } });
-    const visits = await Visit.countDocuments({ property: { $in: propertyIds }, status: 'pending' });
+    const inquiries = await Inquiry.find({ property: { $in: propertyIds } }).select('property status');
+    const visits = await Visit.find({ property: { $in: propertyIds } }).select('property status');
+
+    const newInquiries = inquiries.filter((i) => ['new', 'contacted'].includes(i.status)).length;
+    const pendingVisits = visits.filter((v) => v.status === 'pending').length;
+
+    const propertiesList = properties.map((property) => {
+      const propertyRooms = rooms.filter((r) => r.property.toString() === property._id.toString());
+      const propertyInquiries = inquiries.filter((i) => i.property.toString() === property._id.toString());
+      const propertyVisits = visits.filter((v) => v.property.toString() === property._id.toString());
+
+      return {
+        ...property.toObject(),
+        totalRoomsCount: propertyRooms.length,
+        availableRoomsCount: propertyRooms.filter((r) => r.available).length,
+        pendingInquiriesCount: propertyInquiries.filter((i) => ['new', 'contacted'].includes(i.status)).length,
+        pendingVisitsCount: propertyVisits.filter((v) => v.status === 'pending').length,
+      };
+    });
 
     return res.status(200).json({
       success: true,
@@ -31,9 +48,9 @@ export const getOwnerStats = async (req: AuthRequest, res: Response, next: NextF
         occupiedRooms,
         availableRooms,
         occupancyRate,
-        newInquiries: inquiries,
-        pendingVisits: visits,
-        propertiesList: properties,
+        newInquiries,
+        pendingVisits,
+        propertiesList,
       },
     });
   } catch (error) {

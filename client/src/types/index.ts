@@ -10,6 +10,7 @@ export interface UserPreferences {
   roomType?: 'single' | 'double' | 'triple' | 'any';
   preferredArea?: string;
   maxDistanceKm?: number;
+  curfewFlexible?: boolean;
 }
 
 export interface User {
@@ -36,6 +37,8 @@ export interface LivingScore {
   location: number;
   privacy: number;
   safety: number;
+  ownerResponsiveness: number;
+  valueForMoney: number;
   overall: number;
 }
 
@@ -97,6 +100,10 @@ export interface Property {
     verifiedDate?: string;
   };
   beforeYouBook: string[];
+  goodFor?: string[];
+  thingsToKnow?: string[];
+  areaHighlights?: string[];
+  nearbyByCategory?: Record<string, NearbyPlace[]>;
   rating: number;
   reviewCount: number;
   isFeatured?: boolean;
@@ -104,6 +111,9 @@ export interface Property {
   roomOptions?: RoomOption[];
   rooms?: RoomOption[];
   availableRoomsCount?: number;
+  totalRoomsCount?: number;
+  pendingInquiriesCount?: number;
+  pendingVisitsCount?: number;
   createdAt?: string;
 }
 
@@ -120,8 +130,14 @@ export interface Review {
   location: number;
   privacy: number;
   safety: number;
+  ownerResponsiveness: number;
+  valueForMoney: number;
   overall: number;
   comment: string;
+  whatIWishIKnew?: string;
+  stayDurationMonths?: number;
+  roomType?: 'single' | 'double' | 'triple' | 'quad';
+  isVerifiedDetails?: boolean;
   createdAt: string;
 }
 

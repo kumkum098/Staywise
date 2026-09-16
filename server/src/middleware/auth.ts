@@ -30,6 +30,28 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
   }
 };
 
+export const authenticateOptional = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return next();
+    }
+
+    const token = authHeader.split(' ')[1];
+    const secret = process.env.JWT_SECRET || 'staywise_super_secret_jwt_key_2026_dev';
+
+    const decoded = jwt.verify(token, secret) as { id: string };
+    const user = await User.findById(decoded.id).select('-passwordHash');
+
+    if (user) {
+      req.user = user;
+    }
+    next();
+  } catch (error) {
+    next();
+  }
+};
+
 export const authorize = (...roles: Array<'tenant' | 'owner' | 'admin'>) => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
     if (!req.user) {

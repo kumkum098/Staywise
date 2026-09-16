@@ -1,14 +1,30 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Bookmark, GitCompare, User as UserIcon, LogOut, Building2 } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Bookmark, GitCompare, LogOut, Building2, UserCircle, ChevronDown } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCompare } from '../context/CompareContext';
 import { ROUTES } from '../routes';
+import { Avatar } from './ui/Avatar';
+import { Tooltip } from './ui/Tooltip';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from './ui/DropdownMenu';
 
 export const Navbar: React.FC = () => {
   const { user, logout, savedPropertyIds } = useAuth();
   const { compareProperties } = useCompare();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate(ROUTES.home);
+  };
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -80,16 +96,17 @@ export const Navbar: React.FC = () => {
             )}
 
             {/* Saved Link */}
-            <Link
-              to={ROUTES.saved}
-              className="relative p-2 text-ink-secondary hover:text-brand-700 transition-colors rounded-md hover:bg-surface-muted"
-              title="Saved Properties"
-            >
-              <Bookmark className="w-5 h-5" />
-              {savedPropertyIds.length > 0 && (
-                <span className="absolute top-1 right-1 w-2 h-2 bg-brand-700 rounded-full"></span>
-              )}
-            </Link>
+            <Tooltip content="Saved properties">
+              <Link
+                to={ROUTES.saved}
+                className="relative p-2 text-ink-secondary hover:text-brand-700 transition-colors rounded-md hover:bg-surface-muted"
+              >
+                <Bookmark className="w-5 h-5" />
+                {savedPropertyIds.length > 0 && (
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-brand-700 rounded-full"></span>
+                )}
+              </Link>
+            </Tooltip>
 
             {/* Owner CTA / Auth Buttons */}
             {user?.role === 'owner' || user?.role === 'admin' ? (
@@ -102,7 +119,7 @@ export const Navbar: React.FC = () => {
               </Link>
             ) : (
               <Link
-                to={ROUTES.owner}
+                to={`${ROUTES.register}?role=owner`}
                 className="hidden sm:inline-flex text-xs font-semibold text-ink-secondary hover:text-ink-primary transition-colors px-2 py-1"
               >
                 List your property
@@ -111,24 +128,32 @@ export const Navbar: React.FC = () => {
 
             {/* User Profile / Auth State */}
             {user ? (
-              <div className="flex items-center space-x-2">
-                <Link
-                  to={ROUTES.profile}
-                  className="flex items-center space-x-2 px-3 py-1.5 rounded-lg border border-surface-border hover:border-gray-300 transition-colors bg-white"
-                >
-                  <UserIcon className="w-4 h-4 text-brand-700" />
-                  <span className="text-xs font-medium text-ink-primary max-w-[100px] truncate">
-                    {user.name.split(' ')[0]}
-                  </span>
-                </Link>
-                <button
-                  onClick={logout}
-                  className="p-2 text-ink-muted hover:text-red-600 transition-colors rounded-lg hover:bg-red-50"
-                  title="Log out"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-1.5 rounded-full py-0.5 pl-0.5 pr-2 transition-subtle hover:bg-surface-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-700/30">
+                    <Avatar name={user.name} className="h-8 w-8 text-xs" />
+                    <ChevronDown className="h-3.5 w-3.5 text-ink-muted" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to={ROUTES.profile}>
+                      <UserCircle className="h-4 w-4" /> Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={ROUTES.saved}>
+                      <Bookmark className="h-4 w-4" /> Saved properties
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem destructive onSelect={handleLogout}>
+                    <LogOut className="h-4 w-4" /> Log out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <div className="flex items-center space-x-2">
                 <Link

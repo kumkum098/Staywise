@@ -66,7 +66,7 @@ export const TrueCostCalculatorCard: React.FC<TrueCostCalculatorCardProps> = ({ 
           <div className="flex items-center space-x-1.5">
             <span className="text-ink-secondary">Mess & Meals</span>
             {food === 0 && (
-              <span className="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded font-medium">
+              <span className="text-[10px] text-success-700 bg-success-50 px-1.5 py-0.2 rounded font-medium">
                 Included in rent
               </span>
             )}

@@ -10,6 +10,7 @@ export interface IUserPreferences {
   roomType?: 'single' | 'double' | 'triple' | 'any';
   preferredArea?: string;
   maxDistanceKm?: number;
+  curfewFlexible?: boolean;
 }
 
 export interface IUser extends Document {
@@ -34,6 +35,7 @@ const UserPreferencesSchema = new Schema<IUserPreferences>(
     roomType: { type: String, enum: ['single', 'double', 'triple', 'any'], default: 'any' },
     preferredArea: { type: String, default: '' },
     maxDistanceKm: { type: Number, default: 5 },
+    curfewFlexible: { type: Boolean, default: true },
   },
   { _id: false }
 );

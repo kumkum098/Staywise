@@ -57,8 +57,17 @@ export const api = {
     return handleResponse<{ preferences: UserPreferences }>(res);
   },
 
+  updateProfile: async (payload: { name?: string; phone?: string }) => {
+    const res = await fetch(`${API_BASE}/auth/profile`, {
+      method: 'PATCH',
+      headers: getHeaders(),
+      body: JSON.stringify(payload),
+    });
+    return handleResponse<{ user: User }>(res);
+  },
+
   // Properties
-  getProperties: async (filters?: Partial<FilterState>) => {
+  getProperties: async (filters?: Partial<FilterState> & { owner?: string }) => {
     const params = new URLSearchParams();
     if (filters) {
       Object.entries(filters).forEach(([key, val]) => {
@@ -68,7 +77,9 @@ export const api = {
       });
     }
 
-    const res = await fetch(`${API_BASE}/properties?${params.toString()}`);
+    const res = await fetch(`${API_BASE}/properties?${params.toString()}`, {
+      headers: getHeaders(),
+    });
     return handleResponse<{ properties: Property[]; pagination: any }>(res);
   },
 
@@ -95,6 +106,14 @@ export const api = {
     return handleResponse<{ property: Property }>(res);
   },
 
+  deleteProperty: async (id: string) => {
+    const res = await fetch(`${API_BASE}/properties/${id}`, {
+      method: 'DELETE',
+      headers: getHeaders(),
+    });
+    return handleResponse<Record<string, never>>(res);
+  },
+
   // Rooms
   createRoom: async (propertyId: string, roomData: any) => {
     const res = await fetch(`${API_BASE}/properties/${propertyId}/rooms`, {
@@ -112,6 +131,14 @@ export const api = {
       body: JSON.stringify(roomData),
     });
     return handleResponse<{ room: any }>(res);
+  },
+
+  deleteRoom: async (roomId: string) => {
+    const res = await fetch(`${API_BASE}/rooms/${roomId}`, {
+      method: 'DELETE',
+      headers: getHeaders(),
+    });
+    return handleResponse<Record<string, never>>(res);
   },
 
   // Favorites

@@ -1,13 +1,47 @@
-import React, { useState } from 'react';
-import { Property } from '../types';
-import { MapPin, Navigation, ExternalLink, X } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import { Navigation, ExternalLink, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Property } from '../types';
 
 interface InteractiveMapProps {
   properties: Property[];
   hoveredPropertyId?: string | null;
   onSelectProperty?: (id: string) => void;
 }
+
+const createPriceIcon = (priceK: string, active: boolean) =>
+  L.divIcon({
+    className: 'staywise-map-pin',
+    html: `<div style="
+      display:inline-flex;align-items:center;gap:4px;
+      padding:4px 10px;border-radius:9999px;font-size:12px;font-weight:700;
+      white-space:nowrap;
+      background:${active ? '#C2703C' : '#FFFFFF'};
+      color:${active ? '#FFFFFF' : '#201A17'};
+      border:1px solid ${active ? '#8A4A24' : '#D1D5DB'};
+      box-shadow:0 1px 3px rgba(0,0,0,0.25);
+    ">₹${priceK}k</div>`,
+    iconSize: [1, 1],
+    iconAnchor: [30, 15],
+  });
+
+const FitBounds: React.FC<{ properties: Property[] }> = ({ properties }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (properties.length === 0) return;
+    if (properties.length === 1) {
+      map.setView([properties[0].location.lat, properties[0].location.lng], 15, { animate: false });
+      return;
+    }
+    const bounds = L.latLngBounds(properties.map((p) => [p.location.lat, p.location.lng] as [number, number]));
+    map.fitBounds(bounds, { padding: [40, 40], animate: false });
+  }, [properties, map]);
+
+  return null;
+};
 
 export const InteractiveMap: React.FC<InteractiveMapProps> = ({
   properties,
@@ -16,95 +50,65 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
 }) => {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
 
-  // Jaipur Bounds coordinates simulation for vector pins positioning
-  // Min Lat ~26.81, Max Lat ~26.92 | Min Lng ~75.74, Max Lng ~75.86
-  const getPinPosition = (lat: number, lng: number) => {
-    const minLat = 26.81;
-    const maxLat = 26.93;
-    const minLng = 75.73;
-    const maxLng = 75.87;
-
-    const top = 100 - ((lat - minLat) / (maxLat - minLat)) * 80 - 10;
-    const left = ((lng - minLng) / (maxLng - minLng)) * 80 + 10;
-
-    return { top: `${Math.max(10, Math.min(85, top))}%`, left: `${Math.max(10, Math.min(85, left))}%` };
-  };
+  const center = useMemo<[number, number]>(() => {
+    if (properties.length === 0) return [26.9124, 75.7873];
+    return [properties[0].location.lat, properties[0].location.lng];
+  }, [properties]);
 
   return (
-    <div className="relative w-full h-full min-h-[400px] bg-[#EAEFE9] rounded-lg border border-surface-border overflow-hidden select-none">
-      {/* Visual Map Background Pattern (Simulating Map Vector Roads & River) */}
-      <svg className="absolute inset-0 w-full h-full opacity-30" xmlns="http://www.w3.org/2000/svg">
-        <path d="M 0 100 Q 200 150 400 120 T 800 200" fill="none" stroke="#94A3B8" strokeWidth="6" />
-        <path d="M 100 0 Q 250 300 500 600" fill="none" stroke="#CBD5E1" strokeWidth="12" />
-        <path d="M 300 0 Q 350 200 400 400" fill="none" stroke="#CBD5E1" strokeWidth="8" />
-        <circle cx="450" cy="250" r="40" fill="#CBD5E1" opacity="0.4" />
-        <circle cx="200" cy="180" r="25" fill="#CBD5E1" opacity="0.4" />
-      </svg>
-
-      {/* Map Header / Location Badge */}
-      <div className="absolute top-3 left-3 z-10 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-surface-border shadow-subtle flex items-center space-x-2 text-xs font-semibold text-ink-primary">
-        <Navigation className="w-3.5 h-3.5 text-brand-700" />
+    <div className="relative h-full min-h-[400px] w-full overflow-hidden rounded-lg border border-surface-border">
+      <div className="absolute left-3 top-3 z-[500] flex items-center space-x-2 rounded-lg border border-surface-border bg-white/95 px-3 py-1.5 text-xs font-semibold text-ink-primary shadow-subtle backdrop-blur-sm">
+        <Navigation className="h-3.5 w-3.5 text-brand-700" />
         <span>Jaipur Accommodation Map</span>
-        <span className="text-[10px] text-ink-muted bg-surface-muted px-1.5 py-0.5 rounded">
+        <span className="rounded bg-surface-muted px-1.5 py-0.5 text-[10px] text-ink-muted">
           {properties.length} Listings
         </span>
       </div>
 
-      {/* Pins Layer */}
-      <div className="absolute inset-0">
+      <MapContainer center={center} zoom={13} scrollWheelZoom style={{ height: '100%', width: '100%' }}>
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <FitBounds properties={properties} />
         {properties.map((property) => {
-          const isHovered = hoveredPropertyId === property._id;
-          const isSelected = selectedProperty?._id === property._id;
-          const pos = getPinPosition(property.location.lat, property.location.lng);
-
+          const isActive = hoveredPropertyId === property._id || selectedProperty?._id === property._id;
           const priceK = (property.pricing.startingRent / 1000).toFixed(1);
-
           return (
-            <div
+            <Marker
               key={property._id}
-              style={{ top: pos.top, left: pos.left }}
-              className="absolute -translate-x-1/2 -translate-y-1/2 z-20 cursor-pointer group"
-              onClick={() => {
-                setSelectedProperty(property);
-                if (onSelectProperty) onSelectProperty(property._id);
+              position={[property.location.lat, property.location.lng]}
+              icon={createPriceIcon(priceK, isActive)}
+              eventHandlers={{
+                click: () => {
+                  setSelectedProperty(property);
+                  onSelectProperty?.(property._id);
+                },
               }}
-            >
-              {/* Dynamic Price Pin Tag */}
-              <div
-                className={`px-2.5 py-1 rounded-full text-xs font-bold shadow-md transition-all duration-200 flex items-center space-x-1 border ${
-                  isSelected || isHovered
-                    ? 'bg-brand-700 text-white border-brand-800 scale-110 z-30 ring-2 ring-brand-300'
-                    : 'bg-white text-ink-primary border-gray-300 hover:bg-gray-50 hover:scale-105'
-                }`}
-              >
-                <MapPin className={`w-3 h-3 ${isSelected || isHovered ? 'text-white' : 'text-brand-700'}`} />
-                <span>₹{priceK}k</span>
-              </div>
-            </div>
+            />
           );
         })}
-      </div>
+      </MapContainer>
 
-      {/* Map Popup Card when a pin is selected */}
       {selectedProperty && (
-        <div className="absolute bottom-4 left-4 right-4 z-30 bg-white rounded-lg border border-surface-border shadow-xl p-3 flex items-center space-x-3 animate-in fade-in slide-in-from-bottom-2">
+        <div className="absolute bottom-4 left-4 right-4 z-[500] flex items-center space-x-3 rounded-lg border border-surface-border bg-white p-3 shadow-xl">
           <img
             src={selectedProperty.images[0]}
             alt={selectedProperty.name}
-            className="w-16 h-16 rounded-md object-cover shrink-0"
+            className="h-16 w-16 shrink-0 rounded-md object-cover"
           />
-          <div className="flex-1 min-w-0">
+          <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between">
-              <h4 className="text-xs font-bold text-ink-primary truncate">{selectedProperty.name}</h4>
+              <h4 className="truncate text-xs font-bold text-ink-primary">{selectedProperty.name}</h4>
               <button
                 onClick={() => setSelectedProperty(null)}
-                className="text-ink-muted hover:text-ink-primary p-0.5"
+                className="p-0.5 text-ink-muted hover:text-ink-primary"
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="h-3.5 w-3.5" />
               </button>
             </div>
-            <p className="text-[11px] text-ink-secondary truncate">{selectedProperty.location.area}, Jaipur</p>
-            <div className="flex items-baseline space-x-1 mt-1">
+            <p className="truncate text-[11px] text-ink-secondary">{selectedProperty.location.area}, Jaipur</p>
+            <div className="mt-1 flex items-baseline space-x-1">
               <span className="text-xs font-bold text-brand-700">₹{selectedProperty.pricing.startingRent}/mo</span>
               <span className="text-[10px] text-ink-muted">
                 (≈ ₹{selectedProperty.totalEstimatedMonthly || selectedProperty.pricing.startingRent + 1500} true cost)
@@ -113,10 +117,10 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
           </div>
           <Link
             to={`/property/${selectedProperty._id}`}
-            className="p-2 bg-brand-700 text-white rounded-md hover:bg-brand-800 transition-colors shrink-0"
+            className="shrink-0 rounded-md bg-brand-700 p-2 text-white transition-colors hover:bg-brand-800"
             title="View Details"
           >
-            <ExternalLink className="w-4 h-4" />
+            <ExternalLink className="h-4 w-4" />
           </Link>
         </div>
       )}
