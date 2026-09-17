@@ -4,6 +4,7 @@ import { Property, UserPreferences } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '../routes';
+import { computeTotalMonthlyCost } from '../lib/pricing';
 
 interface LifestyleMatchCardProps {
   property: Property;
@@ -20,12 +21,7 @@ export const LifestyleMatchCard: React.FC<LifestyleMatchCardProps> = ({ property
   };
 
   // Algorithmic Match Calculation
-  const totalCost =
-    property.totalEstimatedMonthly ||
-    property.pricing.startingRent +
-      (property.pricing.foodCost || 0) +
-      (property.pricing.electricityCost || 0) +
-      (property.pricing.maintenanceCost || 0);
+  const totalCost = property.totalEstimatedMonthly || computeTotalMonthlyCost(property.pricing);
 
   const maxBudget = prefs.maxBudget || 15000;
   const budgetPass = totalCost <= maxBudget;
@@ -33,6 +29,11 @@ export const LifestyleMatchCard: React.FC<LifestyleMatchCardProps> = ({ property
   const acPass = !prefs.acRequired || property.amenities.includes('AC');
   const wifiPass = property.amenities.includes('Wi-Fi');
   const foodPass = !prefs.foodRequired || property.amenities.includes('Food') || (property.pricing.foodCost || 0) > 0;
+  const availableRoomTypes = (property.roomOptions || property.rooms || []).map((r) => r.type);
+  const sharingPass =
+    !prefs.roomType || prefs.roomType === 'any' || availableRoomTypes.length === 0 || availableRoomTypes.includes(prefs.roomType);
+  const curfewPass =
+    prefs.curfewFlexible !== false || !property.houseRules.curfew || property.houseRules.curfew === 'No Curfew';
 
   const checks = [
     {
@@ -59,6 +60,18 @@ export const LifestyleMatchCard: React.FC<LifestyleMatchCardProps> = ({ property
       pass: foodPass,
       text: foodPass ? 'Mess / food options available on site' : 'Food service not available on site',
     },
+    {
+      pass: sharingPass,
+      text: sharingPass
+        ? `Your preferred ${prefs.roomType || 'any'} sharing option is available`
+        : `Your preferred ${prefs.roomType} sharing option is not currently available`,
+    },
+    {
+      pass: curfewPass,
+      text: curfewPass
+        ? 'Curfew policy matches your flexibility preference'
+        : `Strict curfew (${property.houseRules.curfew}) may not suit your flexible-hours preference`,
+    },
   ];
 
   const passedCount = checks.filter((c) => c.pass).length;
@@ -69,8 +82,8 @@ export const LifestyleMatchCard: React.FC<LifestyleMatchCardProps> = ({ property
       {/* Header */}
       <div className="flex items-center justify-between border-b border-surface-border pb-3">
         <div className="flex items-center space-x-2">
-          <div className="p-2 rounded bg-emerald-50 text-emerald-800">
-            <Target className="w-5 h-5 text-emerald-700" />
+          <div className="p-2 rounded bg-success-50 text-success-800">
+            <Target className="w-5 h-5 text-success-700" />
           </div>
           <div>
             <h3 className="text-base font-bold text-ink-primary">Lifestyle Preference Match</h3>
@@ -79,7 +92,7 @@ export const LifestyleMatchCard: React.FC<LifestyleMatchCardProps> = ({ property
         </div>
 
         <div className="text-right">
-          <span className="text-lg font-bold text-emerald-700">{matchPercentage}% Match</span>
+          <span className="text-lg font-bold text-success-700">{matchPercentage}% Match</span>
         </div>
       </div>
 
@@ -88,7 +101,7 @@ export const LifestyleMatchCard: React.FC<LifestyleMatchCardProps> = ({ property
         {checks.map((item, idx) => (
           <div key={idx} className="flex items-start space-x-2">
             {item.pass ? (
-              <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-4 h-4 text-success-700 shrink-0 mt-0.5" />
             ) : (
               <XCircle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
             )}

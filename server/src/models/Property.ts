@@ -15,6 +15,8 @@ export interface ILivingScore {
   location: number;
   privacy: number;
   safety: number;
+  ownerResponsiveness: number;
+  valueForMoney: number;
   overall: number;
 }
 
@@ -63,6 +65,8 @@ export interface IProperty extends Document {
     verifiedDate?: Date;
   };
   beforeYouBook: string[];
+  goodFor: string[];
+  thingsToKnow: string[];
   rating: number;
   reviewCount: number;
   isFeatured: boolean;
@@ -93,6 +97,8 @@ const LivingScoreSchema = new Schema<ILivingScore>(
     location: { type: Number, default: 8.0 },
     privacy: { type: Number, default: 8.0 },
     safety: { type: Number, default: 8.0 },
+    ownerResponsiveness: { type: Number, default: 8.0 },
+    valueForMoney: { type: Number, default: 8.0 },
     overall: { type: Number, default: 8.0 },
   },
   { _id: false }
@@ -158,6 +164,8 @@ const PropertySchema = new Schema<IProperty>(
       verifiedDate: { type: Date },
     },
     beforeYouBook: [{ type: String }],
+    goodFor: [{ type: String }],
+    thingsToKnow: [{ type: String }],
     rating: { type: Number, default: 4.5 },
     reviewCount: { type: Number, default: 0 },
     isFeatured: { type: Boolean, default: false },

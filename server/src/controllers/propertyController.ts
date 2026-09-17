@@ -1,10 +1,11 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import { Property } from '../models/Property.js';
 import { Room } from '../models/Room.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { propertyCreateSchema } from '../validators/schemas.js';
+import { deriveGoodFor, deriveThingsToKnow, deriveAreaHighlights, deriveNearbyByCategory } from '../utils/realityCheck.js';
 
-export const getProperties = async (req: Request, res: Response, next: NextFunction) => {
+export const getProperties = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const {
       search,
@@ -22,12 +23,22 @@ export const getProperties = async (req: Request, res: Response, next: NextFunct
       laundry,
       parking,
       isVerified,
+      owner,
       sort = 'recommended',
       page = 1,
       limit = 20,
     } = req.query;
 
     const filterQuery: any = {};
+
+    if (owner === 'me') {
+      if (!req.user) {
+        return res.status(401).json({ success: false, message: 'Not authenticated' });
+      }
+      filterQuery.owner = req.user._id;
+    } else if (owner && typeof owner === 'string') {
+      filterQuery.owner = owner;
+    }
 
     if (search && typeof search === 'string' && search.trim()) {
       filterQuery.$or = [
@@ -124,6 +135,10 @@ export const getProperties = async (req: Request, res: Response, next: NextFunct
           totalEstimatedMonthly,
           roomOptions: rooms,
           availableRoomsCount: rooms.filter((r) => r.available).length,
+          goodFor: obj.goodFor?.length ? obj.goodFor : deriveGoodFor(obj),
+          thingsToKnow: obj.thingsToKnow?.length ? obj.thingsToKnow : deriveThingsToKnow(obj),
+          areaHighlights: deriveAreaHighlights(obj.location),
+          nearbyByCategory: deriveNearbyByCategory(obj.location.nearby),
         };
       })
     );
@@ -145,7 +160,7 @@ export const getProperties = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-export const getPropertyById = async (req: Request, res: Response, next: NextFunction) => {
+export const getPropertyById = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
 
@@ -176,6 +191,10 @@ export const getPropertyById = async (req: Request, res: Response, next: NextFun
           ...obj,
           totalEstimatedMonthly,
           rooms,
+          goodFor: obj.goodFor?.length ? obj.goodFor : deriveGoodFor(obj),
+          thingsToKnow: obj.thingsToKnow?.length ? obj.thingsToKnow : deriveThingsToKnow(obj),
+          areaHighlights: deriveAreaHighlights(obj.location),
+          nearbyByCategory: deriveNearbyByCategory(obj.location.nearby),
         },
       },
     });
@@ -210,6 +229,8 @@ export const createProperty = async (req: AuthRequest, res: Response, next: Next
         location: 9.0,
         privacy: 8.0,
         safety: 9.0,
+        ownerResponsiveness: 8.5,
+        valueForMoney: 8.5,
         overall: 8.5,
       },
       verification: {

@@ -79,7 +79,18 @@ export const updateInquiryStatus = async (req: AuthRequest, res: Response, next:
       return res.status(400).json({ success: false, message: 'Invalid status value.' });
     }
 
-    const inquiry = await Inquiry.findByIdAndUpdate(id, { $set: { status } }, { new: true });
+    const inquiry = await Inquiry.findById(id).populate<{ property: { owner: any } }>('property', 'owner');
+
+    if (!inquiry) {
+      return res.status(404).json({ success: false, message: 'Inquiry not found' });
+    }
+
+    if (req.user.role !== 'admin' && inquiry.property.owner.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Unauthorized to update this inquiry.' });
+    }
+
+    inquiry.status = status;
+    await inquiry.save();
 
     return res.status(200).json({
       success: true,

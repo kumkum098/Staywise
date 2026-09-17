@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Search, Filter, X, SlidersHorizontal, Map, List, RefreshCw } from 'lucide-react';
+import { Search, X, SlidersHorizontal, Map, List } from 'lucide-react';
 import { api } from '../services/api';
 import { PropertyCard } from '../components/PropertyCard';
 import { InteractiveMap } from '../components/InteractiveMap';
 import { PropertyCardSkeleton } from '../components/SkeletonLoader';
+import { EmptyState } from '../components/ui/EmptyState';
+import { ErrorState } from '../components/ui/ErrorState';
 import { FilterState } from '../types';
 
 export const ExplorePage: React.FC = () => {
@@ -67,7 +69,7 @@ export const ExplorePage: React.FC = () => {
     setSearchParams({});
   };
 
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['properties', filters],
     queryFn: () => api.getProperties(filters),
   });
@@ -392,6 +394,8 @@ export const ExplorePage: React.FC = () => {
               <PropertyCardSkeleton />
               <PropertyCardSkeleton />
             </div>
+          ) : isError ? (
+            <ErrorState description="Could not load properties right now." onRetry={() => refetch()} />
           ) : properties.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {properties.map((prop) => (
@@ -403,24 +407,12 @@ export const ExplorePage: React.FC = () => {
               ))}
             </div>
           ) : (
-            /* Empty State */
-            <div className="bg-white rounded-xl border border-surface-border p-12 text-center space-y-4">
-              <div className="w-12 h-12 rounded-full bg-gray-100 text-ink-muted flex items-center justify-center mx-auto">
-                <Search className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-ink-primary">No properties match these filters</h3>
-                <p className="text-xs text-ink-secondary mt-1 max-w-sm mx-auto">
-                  Try expanding your search area, increasing your maximum budget, or clearing amenity filters.
-                </p>
-              </div>
-              <button
-                onClick={clearAllFilters}
-                className="px-4 py-2 bg-brand-700 text-white font-semibold text-xs rounded-lg hover:bg-brand-800 transition-colors"
-              >
-                Clear all filters
-              </button>
-            </div>
+            <EmptyState
+              icon={Search}
+              title="No properties match these filters"
+              description="Try expanding your search area, increasing your maximum budget, or clearing amenity filters."
+              action={{ label: 'Clear all filters', onClick: clearAllFilters }}
+            />
           )}
         </div>
 

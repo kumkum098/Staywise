@@ -62,7 +62,7 @@ export const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link to={ROUTES.ownerPropertyNew} className="hover:text-brand-700 transition-colors">
+                <Link to={`${ROUTES.register}?role=owner`} className="hover:text-brand-700 transition-colors">
                   List Your Property
                 </Link>
               </li>

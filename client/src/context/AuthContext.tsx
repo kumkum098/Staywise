@@ -11,6 +11,7 @@ interface AuthContextType {
   register: (data: any) => Promise<void>;
   logout: () => void;
   updatePreferences: (prefs: UserPreferences) => Promise<void>;
+  updateProfile: (payload: { name?: string; phone?: string }) => Promise<void>;
   isPropertySaved: (propertyId: string) => boolean;
   toggleSaveProperty: (propertyId: string) => Promise<void>;
 }
@@ -93,6 +94,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const updateProfile = async (payload: { name?: string; phone?: string }) => {
+    const res = await api.updateProfile(payload);
+    setUser(res.user);
+  };
+
   const isPropertySaved = (propertyId: string) => {
     return savedPropertyIds.includes(propertyId);
   };
@@ -129,6 +135,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         register,
         logout,
         updatePreferences,
+        updateProfile,
         isPropertySaved,
         toggleSaveProperty,
       }}

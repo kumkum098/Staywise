@@ -4,15 +4,15 @@
 
 @layer base {
   :root {
-    --brand-primary: #0F766E;
-    --brand-hover: #0D9488;
-    --bg-page: #F9FAFB;
-    --border-color: #E5E7EB;
+    --brand-primary: #C2703C;
+    --brand-hover: #8A4A24;
+    --bg-page: #FDF9F6;
+    --border-color: #E8DED5;
   }
 
   body {
     background-color: var(--bg-page);
-    color: #111827;
+    color: #201A17;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
@@ -36,4 +36,18 @@
 /* Utility animation overrides for restrained polish */
 .transition-subtle {
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.text-display {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+@media (min-width: 640px) {
+  .text-display {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
 }

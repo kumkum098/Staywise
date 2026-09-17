@@ -12,9 +12,10 @@ export default defineConfig({
   server: {
     port: 5174,
     host: '0.0.0.0',
+    allowedHosts: ['clips-attacks-must-looksmart.trycloudflare.com'],
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'http://localhost:5001',
         changeOrigin: true,
       },
     },

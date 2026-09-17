@@ -5,6 +5,7 @@ import { Property } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { useCompare } from '../context/CompareContext';
 import { ROUTES } from '../routes';
+import { computeTotalMonthlyCost } from '../lib/pricing';
 
 interface PropertyCardProps {
   property: Property;
@@ -19,13 +20,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, onHover })
   const compared = isInCompare(property._id);
 
   // Compute estimated total monthly cost if not precomputed
-  const estimatedTotal =
-    property.totalEstimatedMonthly ||
-    property.pricing.startingRent +
-      (property.pricing.foodCost || 0) +
-      (property.pricing.electricityCost || 0) +
-      (property.pricing.maintenanceCost || 0) +
-      (property.pricing.wifiCost || 0);
+  const estimatedTotal = property.totalEstimatedMonthly || computeTotalMonthlyCost(property.pricing);
 
   // Pick top distance landmark
   const landmark = property.location.nearby && property.location.nearby.length > 0 ? property.location.nearby[0] : null;
@@ -89,7 +84,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, onHover })
         {/* Verified Badge Overlay at bottom left of image */}
         {property.verification?.isVerified && (
           <div className="absolute bottom-2.5 left-2.5 flex items-center space-x-1 px-2 py-0.5 bg-brand-700/90 backdrop-blur-sm text-white text-[10px] font-medium rounded">
-            <ShieldCheck className="w-3 h-3 text-emerald-300" />
+            <ShieldCheck className="w-3 h-3 text-success-300" />
             <span>Verified Property</span>
           </div>
         )}

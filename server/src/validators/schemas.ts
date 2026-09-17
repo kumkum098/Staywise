@@ -4,7 +4,12 @@ export const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  role: z.enum(['tenant', 'owner', 'admin']).optional().default('tenant'),
+  role: z.enum(['tenant', 'owner']).optional().default('tenant'),
+  phone: z.string().optional(),
+});
+
+export const updateProfileSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters').optional(),
   phone: z.string().optional(),
 });
 
@@ -23,6 +28,7 @@ export const userPreferencesSchema = z.object({
   roomType: z.enum(['single', 'double', 'triple', 'any']).optional(),
   preferredArea: z.string().optional(),
   maxDistanceKm: z.number().optional(),
+  curfewFlexible: z.boolean().optional(),
 });
 
 export const propertyCreateSchema = z.object({
@@ -71,6 +77,8 @@ export const propertyCreateSchema = z.object({
     })
     .optional(),
   beforeYouBook: z.array(z.string()).optional().default([]),
+  goodFor: z.array(z.string()).optional().default([]),
+  thingsToKnow: z.array(z.string()).optional().default([]),
 });
 
 export const roomCreateSchema = z.object({
@@ -92,7 +100,12 @@ export const reviewCreateSchema = z.object({
   location: z.number().min(1).max(10),
   privacy: z.number().min(1).max(10),
   safety: z.number().min(1).max(10),
+  ownerResponsiveness: z.number().min(1).max(10),
+  valueForMoney: z.number().min(1).max(10),
   comment: z.string().min(5, 'Review comment must be at least 5 characters'),
+  whatIWishIKnew: z.string().max(500).optional(),
+  stayDurationMonths: z.number().int().positive().optional(),
+  roomType: z.enum(['single', 'double', 'triple', 'quad']).optional(),
 });
 
 export const inquiryCreateSchema = z.object({

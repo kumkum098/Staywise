@@ -79,7 +79,18 @@ export const updateVisitStatus = async (req: AuthRequest, res: Response, next: N
       return res.status(400).json({ success: false, message: 'Invalid visit status.' });
     }
 
-    const visit = await Visit.findByIdAndUpdate(id, { $set: { status } }, { new: true });
+    const visit = await Visit.findById(id).populate<{ property: { owner: any } }>('property', 'owner');
+
+    if (!visit) {
+      return res.status(404).json({ success: false, message: 'Visit not found' });
+    }
+
+    if (req.user.role !== 'admin' && visit.property.owner.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Unauthorized to update this visit.' });
+    }
+
+    visit.status = status;
+    await visit.save();
 
     return res.status(200).json({
       success: true,
