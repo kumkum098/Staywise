@@ -6,10 +6,10 @@ export const connectDB = async (): Promise<boolean> => {
     await mongoose.connect(mongoURI, {
       serverSelectionTimeoutMS: 5000,
     });
-    console.log(`[MongoDB] Connected successfully to ${mongoURI}`);
+    console.log('[MongoDB] Connected successfully.');
     return true;
   } catch (error: any) {
-    console.warn(`[MongoDB Warning] Could not connect to database (${mongoURI}): ${error.message}`);
+    console.warn(`[MongoDB Warning] Could not connect to database: ${error.message}`);
 
     if (process.env.NODE_ENV === 'production') {
       console.warn('[MongoDB Warning] Refusing to fall back to an in-memory database in production. Set MONGODB_URI.');

@@ -1,6 +1,18 @@
 import { Property, Review, Inquiry, Visit, User, UserPreferences, FilterState } from '../types';
 
-const API_BASE = import.meta.env.VITE_API_URL || '/api';
+const getApiBase = (): string => {
+  const raw = import.meta.env.VITE_API_URL || '/api';
+  const trimmed = raw.trim().replace(/\/+$/, '');
+  if (!trimmed || trimmed === '/api') {
+    return '/api';
+  }
+  if (trimmed.endsWith('/api')) {
+    return trimmed;
+  }
+  return `${trimmed}/api`;
+};
+
+const API_BASE = getApiBase();
 
 const getHeaders = () => {
   const token = localStorage.getItem('staywise_token');
