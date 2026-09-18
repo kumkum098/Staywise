@@ -12,4 +12,5 @@ export const ROUTES = {
   ownerProperty: (id: string) => `/owner/properties/${id}`,
   ownerPropertyNew: '/owner/properties/new',
   ownerInquiries: '/owner/inquiries',
+  adminMonitoring: '/admin/monitoring',
 } as const;

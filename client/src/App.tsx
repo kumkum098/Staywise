@@ -18,6 +18,7 @@ import OwnerDashboardPage from './pages/owner/OwnerDashboardPage';
 import OwnerPropertiesPage from './pages/owner/OwnerPropertiesPage';
 import OwnerPropertyFormPage from './pages/owner/OwnerPropertyFormPage';
 import OwnerInquiriesPage from './pages/owner/OwnerInquiriesPage';
+import AdminMonitoringPage from './pages/AdminMonitoringPage';
 import { ROUTES } from './routes';
 
 const NotFoundPage: React.FC = () => (
@@ -78,6 +79,14 @@ const App: React.FC = () => {
               <Route path="properties/:id" element={<OwnerPropertyFormPage />} />
               <Route path="inquiries" element={<OwnerInquiriesPage />} />
             </Route>
+            <Route
+              path={ROUTES.adminMonitoring}
+              element={
+                <RequireAuth roles={['admin']}>
+                  <AdminMonitoringPage />
+                </RequireAuth>
+              }
+            />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>

@@ -9,7 +9,9 @@ import reviewRoutes from './routes/reviewRoutes.js';
 import inquiryRoutes from './routes/inquiryRoutes.js';
 import visitRoutes from './routes/visitRoutes.js';
 import ownerRoutes from './routes/ownerRoutes.js';
+import monitoringRoutes from './routes/monitoringRoutes.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import mongoose from 'mongoose';
 
 dotenv.config();
 
@@ -77,7 +79,15 @@ app.use(express.urlencoded({ extended: true }));
 
 // API Health Check
 app.get('/api/health', (req: Request, res: Response) => {
-  res.status(200).json({ success: true, message: 'Staywise API operational' });
+  const database = mongoose.connection.readyState === 1 ? 'connected' : 'unavailable';
+  res.status(200).json({
+    success: true,
+    status: 'ok',
+    service: 'staywise-api',
+    database,
+    timestamp: new Date().toISOString(),
+    message: 'Staywise API operational',
+  });
 });
 
 // API Routes
@@ -89,6 +99,7 @@ app.use('/api/favorites', favoriteRoutes);
 app.use('/api/inquiries', inquiryRoutes);
 app.use('/api/visits', visitRoutes);
 app.use('/api/owner', ownerRoutes);
+app.use('/api/monitoring', monitoringRoutes);
 
 // 404 Handler
 app.use((req: Request, res: Response) => {

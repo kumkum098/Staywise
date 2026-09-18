@@ -1,8 +1,9 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Building2, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, Building2, MessageSquare, Activity } from 'lucide-react';
 import { ROUTES } from '../../routes';
 import { cn } from '../../components/ui/cn';
+import { useAuth } from '../../context/AuthContext';
 
 const navItems = [
   { to: ROUTES.owner, label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -11,6 +12,11 @@ const navItems = [
 ];
 
 export const OwnerLayout: React.FC = () => {
+  const { user } = useAuth();
+  const visibleNavItems = user?.role === 'admin'
+    ? [...navItems, { to: ROUTES.adminMonitoring, label: 'Monitoring', icon: Activity, end: false }]
+    : navItems;
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <div className="mb-6">
@@ -19,7 +25,7 @@ export const OwnerLayout: React.FC = () => {
       </div>
       <div className="flex flex-col gap-6 md:flex-row">
         <nav className="flex shrink-0 gap-2 overflow-x-auto md:w-48 md:flex-col md:overflow-visible">
-          {navItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}

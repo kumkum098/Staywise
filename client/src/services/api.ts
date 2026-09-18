@@ -252,4 +252,42 @@ export const api = {
       propertiesList: Property[];
     }>(res);
   },
+
+  // Admin monitoring
+  getMonitoringStatus: async () => {
+    const res = await fetch(`${API_BASE}/monitoring/status`, {
+      headers: getHeaders(),
+    });
+    return handleResponse<{
+      configured: boolean;
+      database: 'connected' | 'unavailable';
+      status: 'UP' | 'DOWN' | 'DEGRADED';
+      responseTime: number | null;
+      httpStatus: number | null;
+      lastCheckedAt: string | null;
+      uptimePercentage: number | null;
+      averageResponseTime: number | null;
+      recentChecks: Array<{
+        _id: string;
+        timestamp: string;
+        status: 'UP' | 'DOWN' | 'DEGRADED';
+        responseTime: number | null;
+        httpStatus: number | null;
+      }>;
+      recentIncidents: Array<{
+        _id: string;
+        incidentStartedAt: string;
+        recoveredAt?: string;
+        duration?: number;
+        reason?: string;
+      }>;
+    }>(res);
+  },
+
+  getMonitoringHistory: async (limit = 50) => {
+    const res = await fetch(`${API_BASE}/monitoring/history?limit=${limit}`, {
+      headers: getHeaders(),
+    });
+    return handleResponse<{ checks: Array<Record<string, unknown>> }>(res);
+  },
 };
