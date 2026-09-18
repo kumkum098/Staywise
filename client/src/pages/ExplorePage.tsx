@@ -34,6 +34,25 @@ export const ExplorePage: React.FC = () => {
     sort: searchParams.get('sort') || 'recommended',
   });
 
+  useEffect(() => {
+    setFilters({
+      search: searchParams.get('search') || '',
+      area: searchParams.get('area') || 'all',
+      propertyType: searchParams.get('propertyType') || 'all',
+      roomType: searchParams.get('roomType') || 'all',
+      gender: searchParams.get('gender') || 'all',
+      minRent: Number(searchParams.get('minRent')) || 0,
+      maxRent: Number(searchParams.get('maxRent')) || 25000,
+      wifi: searchParams.get('wifi') === 'true',
+      ac: searchParams.get('ac') === 'true',
+      food: searchParams.get('food') === 'true',
+      laundry: searchParams.get('laundry') === 'true',
+      parking: searchParams.get('parking') === 'true',
+      isVerified: searchParams.get('isVerified') === 'true',
+      sort: searchParams.get('sort') || 'recommended',
+    });
+  }, [searchParams]);
+
   // Sync state to URL params
   const updateFilters = (newFilters: Partial<FilterState>) => {
     const updated = { ...filters, ...newFilters };

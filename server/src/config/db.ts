@@ -6,10 +6,10 @@ export const connectDB = async (): Promise<boolean> => {
     await mongoose.connect(mongoURI, {
       serverSelectionTimeoutMS: 5000,
     });
-    console.log(`[MongoDB] Connected successfully to ${mongoURI}`);
+    console.log('[MongoDB] Connected successfully.');
     return true;
   } catch (error: any) {
-    console.warn(`[MongoDB Warning] Could not connect to database (${mongoURI}): ${error.message}`);
+    console.warn(`[MongoDB Warning] Could not connect to database: ${error.message}`);
 
     if (process.env.NODE_ENV === 'production') {
       console.warn('[MongoDB Warning] Refusing to fall back to an in-memory database in production. Set MONGODB_URI.');
@@ -19,7 +19,8 @@ export const connectDB = async (): Promise<boolean> => {
     console.warn('[MongoDB] No local/remote MongoDB reachable — starting an in-memory test database for development.');
     console.warn('[MongoDB] Data is ephemeral and will be re-seeded automatically on every server restart.');
     try {
-      const { MongoMemoryServer } = await import('mongodb-memory-server');
+      const memoryServerModule = 'mongodb-memory-server';
+      const { MongoMemoryServer } = await import(memoryServerModule);
       const memoryServer = await MongoMemoryServer.create();
       const memoryURI = memoryServer.getUri('staywise');
       await mongoose.connect(memoryURI);
